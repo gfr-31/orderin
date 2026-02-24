@@ -19,6 +19,7 @@ return new class extends Migration
             $table->enum('role', ['superadmin', 'kasir'])->default('kasir');
             $table->string('phone')->nullable();
             $table->boolean('is_active')->default(true);
+            $table->rememberToken();
             $table->timestamps();
         });
     }
