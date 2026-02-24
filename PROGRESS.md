@@ -77,14 +77,14 @@ Semua tabel sudah terbuat di database:
 
 ## ⏳ Yang Belum Dikerjakan
 
-### STEP 6 — Model & Relasi
-- [ ] Model `User` — relasi ke orders
-- [ ] Model `Admin` — sudah ada, perlu tambah relasi
-- [ ] Model `Category` — relasi ke menu_items
-- [ ] Model `MenuItem` — relasi ke category & order_items
-- [ ] Model `Order` — relasi ke user, order_items, payment
-- [ ] Model `OrderItem` — relasi ke order & menu_item
-- [ ] Model `Payment` — relasi ke order
+### STEP 6 — Model & Relasi ✅
+Semua model sudah dibuat dengan relasi lengkap:
+- `User` → hasMany Orders
+- `Category` → hasMany MenuItems + auto slug dari name
+- `MenuItem` → belongsTo Category, hasMany OrderItems + auto slug dari name
+- `Order` → belongsTo User, hasMany OrderItems, hasOne Payment + auto generate order_number
+- `OrderItem` → belongsTo Order, belongsTo MenuItem
+- `Payment` → belongsTo Order
 
 ### STEP 7 — Filament Resources (Admin Panel)
 - [ ] CategoryResource
