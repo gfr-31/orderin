@@ -16,22 +16,24 @@ class Category extends Model
 
     protected function casts(): array
     {
-        return[
+        return [
             'is_active' => 'boolean',
         ];
     }
 
     // Auto Generate Slug Dari Nama
-    protected static function boot(){
+    protected static function boot()
+    {
         parent::boot();
 
-        static::creating(function ($category){
+        static::creating(function ($category) {
             $category->slug = Str::slug($category->name);
         });
     }
 
     // Relasi Ke Menu Item
-    public function menuItems(){
+    public function menuItems()
+    {
         return $this->hasMany(MenuItem::class);
     }
 }
