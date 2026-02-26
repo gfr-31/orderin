@@ -22,27 +22,44 @@ class OrderResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('user_id')
-                    ->required()
-                    ->numeric(),
+                // Forms\Components\TextInput::make('user_id')
+                //     ->required()
+                //     ->numeric(),
                 Forms\Components\TextInput::make('order_number')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('status')
+                    ->disabled()
+                    ->dehydrated(false),
+                Forms\Components\TextInput::make('user.name')
+                    ->label('Customer')
+                    ->disabled()
+                    ->dehydrated(false),
+                Forms\Components\Select::make('status')
+                    ->options([
+                        'pending' => 'Pending',
+                        'confirmed' => 'Confirmed',
+                        'processing' => 'Processing',
+                        'delivered' => 'Delivered',
+                        'cancelled' => 'Cancelled',
+                    ])
                     ->required(),
                 Forms\Components\TextInput::make('subtotal')
-                    ->required()
-                    ->numeric(),
+                    ->disabled()
+                    ->dehydrated(false)
+                    ->prefix('Rp'),
                 Forms\Components\TextInput::make('tax')
-                    ->required()
-                    ->numeric()
-                    ->default(0.00),
+                    ->disabled()
+                    ->dehydrated(false)
+                    ->prefix('Rp'),
                 Forms\Components\TextInput::make('total')
-                    ->required()
-                    ->numeric(),
+                    ->disabled()
+                    ->dehydrated(false)
+                    ->prefix('Rp'),
                 Forms\Components\Textarea::make('delivery_address')
+                    ->disabled()
+                    ->dehydrated(false)
                     ->columnSpanFull(),
                 Forms\Components\Textarea::make('notes')
+                    ->disabled()
+                    ->dehydrated(false)
                     ->columnSpanFull(),
             ]);
     }
@@ -51,32 +68,50 @@ class OrderResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('user_id')
-                    ->numeric()
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('order_number')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('status'),
-                Tables\Columns\TextColumn::make('subtotal')
-                    ->numeric()
+                    ->searchable()
+                    ->sortable()
+                    ->weight('bold'),
+                Tables\Columns\TextColumn::make('user.name')
+                    ->label('Customer')
+                    ->sortable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('tax')
-                    ->numeric()
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('status')
+                    ->colors([
+                        'gray' => 'pending',
+                        'warning' => 'confirmed',
+                        'primary' => 'processing',
+                        'success' => 'delivered',
+                        'danger' => 'cancelled',
+                    ]),
+                // Tables\Columns\TextColumn::make('subtotal')
+                //     ->numeric()
+                //     ->sortable(),
+                // Tables\Columns\TextColumn::make('tax')
+                //     ->numeric()
+                //     ->sortable(),
                 Tables\Columns\TextColumn::make('total')
-                    ->numeric()
+                    ->money('IDR')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->dateTime('d M Y, H:i')
+                    ->sortable(),
+                // ->toggleable(isToggledHiddenByDefault: true),
+                // Tables\Columns\TextColumn::make('updated_at')
+                //     ->dateTime()
+                //     ->sortable()
+                //     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('status')
+                    ->options([
+                        'pending' => 'Pending',
+                        'confirmed' => 'Confirmed',
+                        'processing' => 'Processing',
+                        'delivered' => 'Delivered',
+                        'cancelled' => 'Cancelled',
+                    ]),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
