@@ -4,8 +4,6 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-use function Laravel\Prompts\confirm;
-
 return new class extends Migration
 {
     /**
@@ -20,9 +18,9 @@ return new class extends Migration
             $table->enum('status', [
                 'pending',
                 'confirmed',
-                'peocessing',
+                'processing',
                 'delivered',
-                'cancelled'
+                'cancelled',
             ])->default('pending');
             $table->decimal('subtotal', 10, 2);
             $table->decimal('tax', 10, 2)->default(0);

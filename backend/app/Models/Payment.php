@@ -13,19 +13,20 @@ class Payment extends Model
         'amount',
         'snap_token',
         'reference_id',
-        'paid_at'
+        'paid_at',
     ];
 
     protected function casts(): array
     {
         return [
-            'amount'=>'decimal:2',
-            'paid_at'=>'decimal:2',
+            'amount' => 'decimal:2',
+            'paid_at' => 'datetime',
         ];
     }
 
     // Relasi Ke Order
-    public function order(){
+    public function order()
+    {
         return $this->belongsTo(Order::class);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Filament\Widgets;
 
 use App\Models\Order;
 use App\Models\Payment;
+use App\Models\User;
 use Carbon\Carbon;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -46,6 +47,11 @@ class StatsOverview extends BaseWidget
                 ->description('Order menunggu konfirmasi')
                 ->descriptionIcon('heroicon-o-clock')
                 ->color('danger'),
+
+            Stat::make('Total Customers', User::count())
+                ->description('Total Customers terdaftar')
+                ->descriptionIcon('heroicon-o-users')
+                ->color('primary'),
         ];
     }
 }

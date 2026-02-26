@@ -103,6 +103,21 @@ class PaymentResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('mark_as_paid')
+                    ->label('Mark as Paid')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->visible(fn ($record) => $record->status === 'pending')
+                    ->action(function ($record) {
+                        $record->update([
+                            'status' => 'paid',
+                            'paid_at' => now(),
+                        ]);
+                        $record->order->update([
+                            'status' => 'confirmed',
+                        ]);
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
