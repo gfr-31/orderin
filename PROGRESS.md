@@ -96,14 +96,14 @@ Semua model sudah dibuat dengan relasi lengkap:
 
 ## ⏳ Yang Belum Dikerjakan
 
-### STEP 7 — Filament Resources (Admin Panel) 🔄 Sedang Dikerjakan
+### STEP 7 — Filament Resources (Admin Panel) ✅
 
-- [x] CategoryResource ← selesai
-- [x] MenuItemResource ← selesai, ada catatan di bawah
-- [ ] OrderResource
-- [ ] PaymentResource (read only)
-- [ ] AdminResource (kelola pegawai, superadmin only)
-- [ ] Dashboard pemasukan
+- [x] CategoryResource
+- [x] MenuItemResource
+- [x] OrderResource
+- [x] PaymentResource (read only + Mark as Paid action)
+- [x] AdminResource (superadmin only)
+- [x] Dashboard pemasukan + Revenue Chart
 
 #### Catatan CategoryResource:
 
@@ -111,7 +111,6 @@ Semua model sudah dibuat dengan relasi lengkap:
 - is_active pakai Toggle, sudah di-cast boolean di model
 - Redirect setelah create/edit langsung ke tabel
 - Validasi unique pada name → muncul notif kalau nama sudah ada
-- is_active di tabel pakai IconColumn (check/x) dengan warna success/danger
 
 #### Catatan MenuItemResource:
 
@@ -120,20 +119,39 @@ Semua model sudah dibuat dengan relasi lengkap:
 - Price prefix Rp, currency IDR
 - Image upload sudah bisa → simpan di public/menu-items
 - APP_URL di .env harus = http://127.0.0.1:8000 biar gambar muncul
-- is_available & is_featured pakai IconColumn
-- Filter by category, is_available, is_featured
-- Redirect setelah create/edit langsung ke tabel
 
-### STEP 8 — API (Laravel Sanctum)
+#### Catatan PaymentResource:
 
-- [ ] Auth API (register, login, logout)
-- [ ] API Resource untuk semua model
-- [ ] Controller & Routes API
-- [ ] Middleware proteksi route
+- Read only — tidak bisa dibuat manual
+- Ada action "Mark as Paid" untuk payment cash
+- Mark as Paid → update payment status ke paid + order status ke confirmed
 
-### STEP 9 — Test API
+#### Catatan Dashboard:
 
-- [ ] Test semua endpoint pakai Postman/Thunder Client
+- StatsOverview: Today's Revenue, Monthly Revenue, Today's Orders, Pending Orders, Total Customers
+- RevenueChart: Line chart pemasukan 7 hari terakhir
+- Pakai Carbon untuk date query
+
+### STEP 8 — API (Laravel Sanctum) ✅
+
+- [x] Auth API (register, login, logout, me)
+- [x] API Resource untuk semua model
+- [x] Controller & Routes API
+- [x] Middleware proteksi route (auth:sanctum)
+
+#### Catatan API:
+
+- Base URL: http://127.0.0.1:8000/api/v1
+- Auth pakai Bearer Token di header
+- Tax PPN 11% otomatis dihitung di OrderController
+- Order number auto-generate di model (ORD-XXXXXXXX)
+- Midtrans webhook sudah ada, integrasi saat frontend selesai
+
+### STEP 9 — Test API ✅
+
+- [x] Register, Login, Me ✅
+- [x] Get Categories, Get Menu ✅
+- [x] Create Order, Get Orders ✅
 
 ### STEP 10 — Frontend React
 
@@ -153,6 +171,15 @@ Semua model sudah dibuat dengan relasi lengkap:
 - [ ] Backend → Railway
 - [ ] Frontend → Vercel
 - [ ] Database → Railway MySQL
+
+### STEP 13 — Fitur Voucher & Referral (Bonus) 🎁
+
+- [ ] Tabel `vouchers` (code, type, value, min_order, max_uses, expired_at, is_active)
+- [ ] Kolom `discount` & `voucher_code` di tabel `orders`
+- [ ] VoucherController (validasi & apply kode)
+- [ ] FilamentResource untuk kelola voucher (superadmin only)
+- [ ] Input kode voucher di halaman cart (frontend)
+- [ ] Tampilan potongan harga di cart & checkout
 
 ---
 
