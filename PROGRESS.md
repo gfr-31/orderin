@@ -153,14 +153,36 @@ Semua model sudah dibuat dengan relasi lengkap:
 - [x] Get Categories, Get Menu ✅
 - [x] Create Order, Get Orders ✅
 
-### STEP 10 — Frontend React
+### STEP 10 — Frontend React 🔄 Sedang Dikerjakan
 
-- [ ] Setup React + Vite + Tailwind CSS
-- [ ] Halaman login & register customer
-- [ ] Halaman menu & kategori
-- [ ] Halaman keranjang & checkout
-- [ ] Halaman riwayat order
+- [x] Setup React + Vite + Tailwind CSS
+- [x] Setup Google Fonts (Playfair Display + Plus Jakarta Sans)
+- [x] Setup Axios + API service
+- [x] Setup Auth Store (Zustand + persist ke localStorage)
+- [x] Setup Cart Store (Zustand + persist ke localStorage)
+- [x] Setup React Router (protected & guest routes)
+- [x] Halaman Login
+- [x] Halaman Register
+- [x] Halaman Home (menu grid, kategori, search, banner)
+- [x] Halaman Cart & Checkout ← selesai
+- [ ] Halaman Riwayat Order
 - [ ] Integrasi Midtrans payment
+
+#### Catatan Cart:
+
+- Cart persist ke localStorage (tidak hilang saat refresh)
+- Delivery address & notes wajib diisi
+- Checkout kirim ke POST /api/v1/orders
+- Setelah checkout berhasil → clearCart + redirect ke /orders
+
+#### Catatan Frontend:
+
+- Base URL API: http://127.0.0.1:8000/api/v1
+- Warna utama: #E8192C (merah bold)
+- Font: Playfair Display (heading) + Plus Jakarta Sans (body)
+- State management: Zustand (authStore + cartStore)
+- Auto attach Bearer token via Axios interceptor
+- Auto redirect ke /login kalau token expired (401)
 
 ### STEP 11 — Testing Keseluruhan
 

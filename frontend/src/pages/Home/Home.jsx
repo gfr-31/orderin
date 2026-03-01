@@ -1,3 +1,314 @@
-export default function Register() {
-  return <div>Register</div>;
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../../services/api";
+import useAuthStore from "../../store/authStore";
+import useCartStore from "../../store/cartStore";
+
+export default function Home() {
+  const navigate = useNavigate();
+  const { user, logout } = useAuthStore();
+  const { items, addItem, getTotalItems } = useCartStore();
+
+  const [categories, setCategories] = useState([]);
+  const [menuItems, setMenuItems] = useState([]);
+  const [activeCategory, setActiveCategory] = useState("all");
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const [catRes, menuRes] = await Promise.all([
+        api.get("/categories"),
+        api.get("/menu"),
+      ]);
+      setCategories(catRes.data.data);
+      setMenuItems(menuRes.data.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchByCategory = async (slug) => {
+    setActiveCategory(slug);
+    setLoading(true);
+    try {
+      const url = slug === "all" ? "/menu" : `/menu?category=${slug}`;
+      const res = await api.get(url);
+      setMenuItems(res.data.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredMenu = menuItems.filter((item) =>
+    item.name.toLowerCase().includes(search.toLowerCase()),
+  );
+
+  const handleLogout = async () => {
+    try {
+      await api.post("/logout");
+    } catch (err) {}
+    logout();
+    navigate("/login");
+  };
+
+  const formatPrice = (price) =>
+    new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(price);
+
+  return (
+    <div
+      className="min-h-screen bg-gray-50"
+      style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+    >
+      {/* TOP NAV */}
+      <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+          <span
+            className="text-2xl font-black"
+            style={{ fontFamily: "Playfair Display, serif", color: "#E8192C" }}
+          >
+            Orderin
+          </span>
+
+          {/* SEARCH — desktop */}
+          <div className="hidden md:flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 w-80">
+            <span className="text-gray-400">🔍</span>
+            <input
+              type="text"
+              placeholder="Cari menu..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="bg-transparent outline-none text-sm flex-1"
+            />
+          </div>
+
+          <div className="flex items-center gap-3">
+            {/* CART BUTTON */}
+            <button
+              onClick={() => navigate("/cart")}
+              className="relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold"
+              style={{ background: "#FFF0F1", color: "#E8192C" }}
+            >
+              🛒
+              {getTotalItems() > 0 && (
+                <span
+                  className="absolute -top-1 -right-1 w-5 h-5 rounded-full text-white text-xs flex items-center justify-center font-bold"
+                  style={{ background: "#E8192C" }}
+                >
+                  {getTotalItems()}
+                </span>
+              )}
+              <span className="hidden md:inline">Cart</span>
+            </button>
+
+            {/* ORDERS */}
+            <button
+              onClick={() => navigate("/orders")}
+              className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-gray-600 bg-gray-100"
+            >
+              📋 Orders
+            </button>
+
+            {/* AVATAR */}
+            <div className="flex items-center gap-2">
+              <div
+                className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold"
+                style={{ background: "#E8192C" }}
+              >
+                {user?.name?.charAt(0).toUpperCase()}
+              </div>
+              <button
+                onClick={handleLogout}
+                className="text-xs text-gray-400 hover:text-red-500"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <div className="max-w-7xl mx-auto px-4 py-6 pb-24">
+        {/* SEARCH — mobile */}
+        <div className="flex md:hidden items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-3 mb-6">
+          <span className="text-gray-400">🔍</span>
+          <input
+            type="text"
+            placeholder="Cari menu..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="bg-transparent outline-none text-sm flex-1"
+          />
+        </div>
+
+        {/* BANNER */}
+        <div
+          className="rounded-2xl p-6 md:p-8 mb-8 relative overflow-hidden flex items-center justify-between"
+          style={{ background: "linear-gradient(135deg, #E8192C, #8B0000)" }}
+        >
+          <div className="text-white">
+            <div className="inline-block bg-white bg-opacity-20 rounded-full px-3 py-1 text-xs font-semibold mb-3">
+              🔥 Promo Hari Ini
+            </div>
+            <h2
+              className="text-2xl md:text-3xl font-black mb-2"
+              style={{ fontFamily: "Playfair Display, serif" }}
+            >
+              Diskon 30%
+              <br />
+              Semua Menu!
+            </h2>
+            <p className="text-white text-opacity-80 text-sm">
+              Berlaku sampai jam 21.00 WIB
+            </p>
+          </div>
+          <div className="text-6xl md:text-8xl">🍜</div>
+        </div>
+
+        {/* CATEGORIES */}
+        <div className="flex gap-3 overflow-x-auto pb-2 mb-6 scrollbar-hide">
+          <button
+            onClick={() => fetchByCategory("all")}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap border transition-all"
+            style={{
+              background: activeCategory === "all" ? "#E8192C" : "white",
+              color: activeCategory === "all" ? "white" : "#6B7280",
+              borderColor: activeCategory === "all" ? "#E8192C" : "#e5e7eb",
+            }}
+          >
+            🍖 Semua
+          </button>
+          {categories.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => fetchByCategory(cat.slug)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap border transition-all"
+              style={{
+                background: activeCategory === cat.slug ? "#E8192C" : "white",
+                color: activeCategory === cat.slug ? "white" : "#6B7280",
+                borderColor:
+                  activeCategory === cat.slug ? "#E8192C" : "#e5e7eb",
+              }}
+            >
+              {cat.icon} {cat.name}
+            </button>
+          ))}
+        </div>
+
+        {/* MENU GRID */}
+        <h3
+          className="text-xl font-bold mb-4"
+          style={{ fontFamily: "Playfair Display, serif" }}
+        >
+          Menu Tersedia
+        </h3>
+
+        {loading ? (
+          <div className="text-center py-20 text-gray-400">Loading...</div>
+        ) : filteredMenu.length === 0 ? (
+          <div className="text-center py-20 text-gray-400">
+            Menu tidak ditemukan 😢
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {filteredMenu.map((item) => (
+              <div
+                key={item.id}
+                className="bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-lg transition-all hover:-translate-y-1"
+              >
+                {/* IMAGE */}
+                <div className="h-32 bg-gray-50 flex items-center justify-center text-5xl relative">
+                  {item.image ? (
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    "🍽️"
+                  )}
+                  {item.is_featured && (
+                    <span className="absolute top-2 left-2 bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-0.5 rounded-full">
+                      ⭐ Featured
+                    </span>
+                  )}
+                </div>
+
+                {/* INFO */}
+                <div className="p-3">
+                  <div className="text-xs text-gray-400 mb-1">
+                    {item.category?.name}
+                  </div>
+                  <div className="font-semibold text-sm mb-2 line-clamp-1">
+                    {item.name}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span
+                      className="font-bold text-sm"
+                      style={{ color: "#E8192C" }}
+                    >
+                      {formatPrice(item.price)}
+                    </span>
+                    <button
+                      onClick={() => addItem(item)}
+                      className="w-8 h-8 rounded-lg text-white text-lg font-light flex items-center justify-center"
+                      style={{ background: "#E8192C" }}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* MOBILE BOTTOM NAV */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex md:hidden z-50">
+        <button
+          className="flex-1 flex flex-col items-center py-3 gap-1 text-xs font-semibold"
+          style={{ color: "#E8192C" }}
+        >
+          <span className="text-xl">🏠</span> Home
+        </button>
+        <button
+          onClick={() => navigate("/cart")}
+          className="flex-1 flex flex-col items-center py-3 gap-1 text-xs text-gray-400 relative"
+        >
+          <span className="text-xl">🛒</span>
+          {getTotalItems() > 0 && (
+            <span
+              className="absolute top-2 right-6 w-4 h-4 rounded-full text-white text-xs flex items-center justify-center font-bold"
+              style={{ background: "#E8192C", fontSize: "9px" }}
+            >
+              {getTotalItems()}
+            </span>
+          )}
+          Cart
+        </button>
+        <button
+          onClick={() => navigate("/orders")}
+          className="flex-1 flex flex-col items-center py-3 gap-1 text-xs text-gray-400"
+        >
+          <span className="text-xl">📋</span> Orders
+        </button>
+        <button className="flex-1 flex flex-col items-center py-3 gap-1 text-xs text-gray-400">
+          <span className="text-xl">👤</span> Profile
+        </button>
+      </div>
+    </div>
+  );
 }

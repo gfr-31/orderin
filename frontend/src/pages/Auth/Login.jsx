@@ -45,7 +45,7 @@ export default function login() {
               className="text-4xl font-black"
               style={{ color: "#8192C", fontFamily: "Playfair Display, serif" }}
             >
-              0
+              02
             </span>
           </div>
           <h1
@@ -86,7 +86,9 @@ export default function login() {
           <form onSubmit={heandleSubmit} className="space-y-4">
             {/* Email */}
             <div>
-              <label className="block text-sm font-600 mb-2 text-gray-700"></label>
+              <label className="block text-sm font-600 mb-2 text-gray-700">
+                Email
+              </label>
               <input
                 type="email"
                 placeholder="email@example.com"
@@ -128,7 +130,7 @@ export default function login() {
                 transition: "all 0.2s",
               }}
             >
-              {loading ? "Masuk..." : "Masuk->"}
+              {loading ? "Masuk..." : "Masuk →"}
             </button>
           </form>
 
@@ -140,7 +142,7 @@ export default function login() {
               className="font-bold"
               style={{ color: "#E8192C" }}
             >
-              Daftra Sekarang
+              Daftar Sekarang
             </Link>
           </p>
         </div>
