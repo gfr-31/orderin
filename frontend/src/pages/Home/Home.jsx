@@ -6,7 +6,7 @@ import useCartStore from "../../store/cartStore";
 
 export default function Home() {
   const navigate = useNavigate();
-  const { user, logout } = useAuthStore();
+  const { user, logout, isAuthenticated } = useAuthStore();
   const { items, addItem, getTotalItems } = useCartStore();
 
   const [categories, setCategories] = useState([]);
@@ -18,6 +18,14 @@ export default function Home() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  const handleAddItem = (item) => {
+    if (!isAuthenticated) {
+      navigate("/cart");
+      return;
+    }
+    addItem(item);
+  };
 
   const fetchData = async () => {
     try {
@@ -75,12 +83,18 @@ export default function Home() {
       {/* TOP NAV */}
       <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <span
-            className="text-2xl font-black"
-            style={{ fontFamily: "Playfair Display, serif", color: "#E8192C" }}
+          <div
+            className="flex flex-col"
+            style={{
+              fontFamily: "Playfair Display, serif",
+              color: "#E8192C",
+            }}
           >
-            Orderin
-          </span>
+            <span className="text-2xl font-black">Orderin</span>
+            <span className="text-xs ml-1">
+              {user ? "Hallo " + user.name.split(" ")[0] + "👋" : ""}
+            </span>
+          </div>
 
           {/* SEARCH — desktop */}
           <div className="hidden md:flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 w-80">
@@ -123,18 +137,30 @@ export default function Home() {
 
             {/* AVATAR */}
             <div className="flex items-center gap-2">
-              <div
-                className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold"
-                style={{ background: "#E8192C" }}
-              >
-                {user?.name?.charAt(0).toUpperCase()}
-              </div>
-              <button
-                onClick={handleLogout}
-                className="text-xs text-gray-400 hover:text-red-500"
-              >
-                Logout
-              </button>
+              {user ? (
+                <>
+                  <div
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold"
+                    style={{ background: "#E8192C" }}
+                  >
+                    {user?.name?.charAt(0).toUpperCase()}
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="text-xs text-gray-400 hover:text-red-500 "
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => navigate("/login")}
+                  className="text-sm text-gray-400 md:flex items-center gap-2 px-4 py-2 rounded-xl font-semibold bg-gray-100"
+                  style={{ background: "#FFF0F1", color: "#E8192C" }}
+                >
+                  Login
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -166,12 +192,12 @@ export default function Home() {
               className="text-2xl md:text-3xl font-black mb-2"
               style={{ fontFamily: "Playfair Display, serif" }}
             >
-              Diskon 30%
+              Diskon 100%
               <br />
               Semua Menu!
             </h2>
             <p className="text-white text-opacity-80 text-sm">
-              Berlaku sampai jam 21.00 WIB
+              Berlaku sampai akhir 2026
             </p>
           </div>
           <div className="text-6xl md:text-8xl">🍜</div>
@@ -262,7 +288,7 @@ export default function Home() {
                       {formatPrice(item.price)}
                     </span>
                     <button
-                      onClick={() => addItem(item)}
+                      onClick={() => handleAddItem(item)}
                       className="w-8 h-8 rounded-lg text-white text-lg font-light flex items-center justify-center"
                       style={{ background: "#E8192C" }}
                     >
@@ -305,9 +331,14 @@ export default function Home() {
         >
           <span className="text-xl">📋</span> Orders
         </button>
-        <button className="flex-1 flex flex-col items-center py-3 gap-1 text-xs text-gray-400">
-          <span className="text-xl">👤</span> Profile
-        </button>
+
+        {user ? (
+          <button className="flex-1 flex flex-col items-center py-3 gap-1 text-xs text-gray-400">
+            <span className="text-xl">👤</span> Profile
+          </button>
+        ) : (
+          ""
+        )}
       </div>
     </div>
   );

@@ -72,7 +72,10 @@ export default function Cart() {
       {/* Header */}
       <nav className=" bg-white border-b border-gray-100 sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center gap-4">
-          <button className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center text-gray-600">
+          <button
+            className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center text-gray-600"
+            onClick={() => navigate("/")}
+          >
             ←
           </button>
           <h1

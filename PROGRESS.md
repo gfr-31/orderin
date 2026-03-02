@@ -164,7 +164,8 @@ Semua model sudah dibuat dengan relasi lengkap:
 - [x] Halaman Login
 - [x] Halaman Register
 - [x] Halaman Home (menu grid, kategori, search, banner)
-- [x] Halaman Cart & Checkout ← selesai
+- [x] Halaman Cart & Checkout
+- [x] Auth Guard Modal (LoginAlert) — muncul kalau belum login & akses protected route
 - [ ] Halaman Riwayat Order
 - [ ] Integrasi Midtrans payment
 
@@ -174,6 +175,12 @@ Semua model sudah dibuat dengan relasi lengkap:
 - Delivery address & notes wajib diisi
 - Checkout kirim ke POST /api/v1/orders
 - Setelah checkout berhasil → clearCart + redirect ke /orders
+
+#### Catatan Auth Guard:
+
+- Home bisa diakses semua orang tanpa login
+- Kalau akses route protected (cart, orders) tanpa login → muncul LoginAlert modal
+- LoginAlert: tombol "Nanti Dulu" tutup modal, tombol "Login →" ke halaman login
 
 #### Catatan Frontend:
 

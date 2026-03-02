@@ -130,7 +130,18 @@ export default function login() {
                 transition: "all 0.2s",
               }}
             >
-              {loading ? "Masuk..." : "Masuk →"}
+              {loading ? "Masuk..." : "Masuk"}
+            </button>
+            <button
+              type="button"
+              className="w-full py-4 rounded-xl text-white font-bold text-sm "
+              style={{
+                background: "#E8192C",
+                transition: "all 0.2s",
+              }}
+              onClick={() => navigate("/")}
+            >
+              Home
             </button>
           </form>
 
