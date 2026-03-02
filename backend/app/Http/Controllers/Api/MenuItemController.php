@@ -30,11 +30,19 @@ class MenuItemController extends Controller
             $query->where('name', 'like', '%'.$request->search.'%');
         }
 
-        $menuItems = $query->get();
+        $menuItems = $query->paginate(10);
 
         return response()->json([
             'data' => MenuItemResource::collection($menuItems),
+            'meta' => [
+                'current_page' => $menuItems->currentPage(),
+                'last_page' => $menuItems->lastPage(),
+                'per_page' => $menuItems->perPage(),
+                'total' => $menuItems->total(),
+            ],
         ]);
+        // return MenuItemResource::collection($menuItems);
+
     }
 
     public function show(MenuItem $menuItem)
@@ -44,5 +52,7 @@ class MenuItemController extends Controller
         return response()->json([
             'data' => new MenuItemResource($menuItem),
         ]);
+
+        // return MenuItemResource::collection($menuItem);
     }
 }

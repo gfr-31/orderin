@@ -56,7 +56,7 @@ export default function Cart() {
       });
 
       clearCart();
-      navigate("/");
+      navigate("/orders");
     } catch (error) {
       setError(error.response?.data?.message || "Gagal membuat order!");
     } finally {

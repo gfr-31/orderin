@@ -14,6 +14,10 @@ export default function Home() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [lastPage, setLastPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [searchTimeout, setSearchTimeout] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -31,10 +35,12 @@ export default function Home() {
     try {
       const [catRes, menuRes] = await Promise.all([
         api.get("/categories"),
-        api.get("/menu"),
+        api.get("/menu?page=1"),
       ]);
       setCategories(catRes.data.data);
       setMenuItems(menuRes.data.data);
+      setLastPage(menuRes.data.meta.last_page);
+      setCurrentPage(1);
     } catch (err) {
       console.error(err);
     } finally {
@@ -45,14 +51,37 @@ export default function Home() {
   const fetchByCategory = async (slug) => {
     setActiveCategory(slug);
     setLoading(true);
+    setMenuItems([]);
+    setCurrentPage(1);
     try {
-      const url = slug === "all" ? "/menu" : `/menu?category=${slug}`;
+      const url =
+        slug === "all" ? "/menu?page=1" : `/menu?category=${slug}&page=1`;
       const res = await api.get(url);
       setMenuItems(res.data.data);
+      setLastPage(res.data.meta.last_page);
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadMore = async () => {
+    if (loadingMore || currentPage >= lastPage) return;
+    setLoadingMore(true);
+    try {
+      const nextPage = currentPage + 1;
+      const url =
+        activeCategory === "all"
+          ? `/menu?page=${nextPage}`
+          : `/menu?category=${activeCategory}&page=${nextPage}`;
+      const res = await api.get(url);
+      setMenuItems((prev) => [...prev, ...res.data.data]); // append data baru
+      setCurrentPage(nextPage);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingMore(false);
     }
   };
 
@@ -74,6 +103,35 @@ export default function Home() {
       currency: "IDR",
       minimumFractionDigits: 0,
     }).format(price);
+
+  const handleSearch = (value) => {
+    setSearch(value);
+
+    // Batalkan timeout sebelumnya
+    if (searchTimeout) clearTimeout(searchTimeout);
+
+    // Tunggu 700ms setelah user berhenti mengetik
+    const timeout = setTimeout(async () => {
+      setLoading(true);
+      setMenuItems([]);
+      setCurrentPage(1);
+      try {
+        const url =
+          activeCategory === "all"
+            ? `/menu?page=1&search=${value}`
+            : `/menu?category=${activeCategory}&page=1&search=${value}`;
+        const res = await api.get(url);
+        setMenuItems(res.data.data);
+        setLastPage(res.data.meta.last_page);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }, 700);
+
+    setSearchTimeout(timeout);
+  };
 
   return (
     <div
@@ -103,7 +161,7 @@ export default function Home() {
               type="text"
               placeholder="Cari menu..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => handleSearch(e.target.value)}
               className="bg-transparent outline-none text-sm flex-1"
             />
           </div>
@@ -174,7 +232,7 @@ export default function Home() {
             type="text"
             placeholder="Cari menu..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => handleSearch(e.target.value)}
             className="bg-transparent outline-none text-sm flex-1"
           />
         </div>
@@ -260,6 +318,7 @@ export default function Home() {
                     <img
                       src={item.image}
                       alt={item.name}
+                      loading="lazy"
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -298,6 +357,20 @@ export default function Home() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* LOAD MORE */}
+        {currentPage < lastPage && (
+          <div className="text-center mt-6">
+            <button
+              onClick={loadMore}
+              disabled={loadingMore}
+              className="px-8 py-3 rounded-xl text-sm font-semibold text-white"
+              style={{ background: loadingMore ? "#ccc" : "#E8192C" }}
+            >
+              {loadingMore ? "⏳ Loading..." : "Lihat Lebih Banyak"}
+            </button>
           </div>
         )}
       </div>
