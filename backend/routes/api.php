@@ -42,5 +42,6 @@ Route::prefix('v1')->group(function () {
 
         // Payment
         Route::get('/orders/{order}/payment', [PaymentController::class, 'show']);
+        Route::get('/orders/{order}/snap-token', [PaymentController::class, 'getSnapToken']);
     });
 });

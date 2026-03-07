@@ -9,6 +9,7 @@ export default function Orders() {
   const [cancelLoading, setCancelLoading] = useState(null);
   const [alert, setAlert] = useState({ show: false, message: "", type: "" });
   const [confirm, setConfirm] = useState({ show: false, orderId: null });
+  const [payLoading, setPayLoading] = useState(null);
 
   useEffect(() => {
     fetchOrders();
@@ -72,6 +73,39 @@ export default function Orders() {
       showAlert(err.response?.data?.message || "Gagal membatalkan order!");
     } finally {
       setCancelLoading(null);
+    }
+  };
+
+  const handlePayment = async (order) => {
+    setPayLoading(order.id);
+    try {
+      // Minta snap token dari backend
+      const res = await api.get(`/orders/${order.id}/snap-token`);
+      const snapToken = res.data.snap_token;
+
+      // Buka popup Midtrans
+      window.snap.pay(snapToken, {
+        onSuccess: (result) => {
+          showAlert("Pembayaran berhasil! 🎉", "success");
+          fetchOrders();
+        },
+        onPending: (result) => {
+          showAlert("Menunggu pembayaran...", "success");
+          fetchOrders();
+        },
+        onError: (result) => {
+          showAlert("Pembayaran gagal!");
+        },
+        onClose: () => {
+          showAlert("Kamu menutup popup pembayaran", "error");
+        },
+        onClose: () => {
+          setPayLoading(null); // enable tombol lagi kalau popup ditutup
+        },
+      });
+    } catch (err) {
+      showAlert(err.response?.data?.message || "Gagal memproses pembayaran!");
+      setPayLoading(null);
     }
   };
 
@@ -182,10 +216,17 @@ export default function Orders() {
                         : "Batalkan"}
                     </button>
                     <button
+                      onClick={() => handlePayment(order)}
+                      disabled={payLoading === order.id}
                       className="px-4 py-2 rounded-xl text-xs font-semibold text-white"
-                      style={{ background: "#E8192C" }}
+                      style={{
+                        background:
+                          payLoading === order.id ? "#ccc" : "#E8192C",
+                      }}
                     >
-                      Bayar Sekarang
+                      {payLoading === order.id
+                        ? "⏳ Memproses..."
+                        : "Bayar Sekarang"}
                     </button>
                   </div>
                 )}
