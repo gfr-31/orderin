@@ -115,6 +115,7 @@ class OrderResource extends Resource
 
             ])
             ->defaultSort('created_at', 'desc')
+            ->poll('10s')
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
@@ -127,6 +128,17 @@ class OrderResource extends Resource
                     ]),
             ])
             ->actions([
+                Tables\Actions\Action::make('view_detail')
+                    ->label('Detail')
+                    ->icon('heroicon-o-eye')
+                    ->color('gray')
+                    ->modalHeading(fn ($record) => 'Detail Order '.$record->order_number)
+                    ->modalContent(fn ($record) => view('filament.orders.detail', [
+                        'order' => $record->load(['orderItems.menuItem', 'user']),
+                    ]))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Tutup'),
+
                 Tables\Actions\Action::make('prepare')
                     ->label('Siapkan')
                     ->icon('heroicon-o-fire')
