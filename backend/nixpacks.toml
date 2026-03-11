@@ -9,7 +9,7 @@ nixPkgs = [
     "php82Extensions.zip", 
     "php82Extensions.gd", 
     "php82Extensions.intl",
-    "composer"
+    "php82Packages.composer" # <--- Ubah baris ini
 ]
 
 [phases.install]
