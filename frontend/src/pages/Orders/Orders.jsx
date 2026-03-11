@@ -13,6 +13,13 @@ export default function Orders() {
 
   useEffect(() => {
     fetchOrders();
+
+    // Auto refresh tiap 10 detik
+    const interval = setInterval(() => {
+      fetchOrders();
+    }, 10000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const fetchOrders = async () => {
@@ -43,14 +50,22 @@ export default function Orders() {
     }).format(new Date(date));
 
   const getStatusStyle = (status) => {
-    const styles = {
-      pending: { background: "#FFF7ED", color: "#C2410C" },
-      confirmed: { background: "#F0FDF4", color: "#15803D" },
-      processing: { background: "#EFF6FF", color: "#1D4ED8" },
-      delivered: { background: "#F0FDF4", color: "#15803D" },
-      cancelled: { background: "#FFF0F1", color: "#E8192C" },
-    };
-    return styles[status] || { background: "#F5F5F5", color: "#6B7280" };
+    switch (status) {
+      case "pending":
+        return { bg: "#FEF9C3", color: "#854D0E", label: "⏳ Menunggu Bayar" };
+      case "confirmed":
+        return { bg: "#DBEAFE", color: "#1E40AF", label: "💳 Dibayar" };
+      case "preparing":
+        return { bg: "#FFEDD5", color: "#9A3412", label: "🍳 Disiapkan" };
+      case "out_for_delivery":
+        return { bg: "#EDE9FE", color: "#5B21B6", label: "🚗 Diantar" };
+      case "delivered":
+        return { bg: "#DCFCE7", color: "#15803D", label: "✅ Selesai" };
+      case "cancelled":
+        return { bg: "#FEE2E2", color: "#991B1B", label: "❌ Dibatalkan" };
+      default:
+        return { bg: "#F3F4F6", color: "#374151", label: status };
+    }
   };
 
   const showAlert = (message, type = "error") => {
@@ -79,28 +94,27 @@ export default function Orders() {
   const handlePayment = async (order) => {
     setPayLoading(order.id);
     try {
-      // Minta snap token dari backend
       const res = await api.get(`/orders/${order.id}/snap-token`);
       const snapToken = res.data.snap_token;
 
-      // Buka popup Midtrans
       window.snap.pay(snapToken, {
-        onSuccess: (result) => {
+        onSuccess: () => {
           showAlert("Pembayaran berhasil! 🎉", "success");
+          setPayLoading(null);
           fetchOrders();
         },
-        onPending: (result) => {
+        onPending: () => {
           showAlert("Menunggu pembayaran...", "success");
+          setPayLoading(null);
           fetchOrders();
         },
-        onError: (result) => {
+        onError: () => {
           showAlert("Pembayaran gagal!");
+          setPayLoading(null);
         },
         onClose: () => {
           showAlert("Kamu menutup popup pembayaran", "error");
-        },
-        onClose: () => {
-          setPayLoading(null); // enable tombol lagi kalau popup ditutup
+          setPayLoading(null);
         },
       });
     } catch (err) {
@@ -204,45 +218,65 @@ export default function Orders() {
                     {formatPrice(order.total)}
                   </p>
                 </div>
-                {order.status === "pending" && (
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => confirmCancel(order.id)}
-                      disabled={cancelLoading === order.id}
-                      className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-500 bg-gray-100"
-                    >
-                      {cancelLoading === order.id
-                        ? "⏳ Membatalkan..."
-                        : "Batalkan"}
-                    </button>
-                    <button
-                      onClick={() => handlePayment(order)}
-                      disabled={payLoading === order.id}
-                      className="px-4 py-2 rounded-xl text-xs font-semibold text-white"
-                      style={{
-                        background:
-                          payLoading === order.id ? "#ccc" : "#E8192C",
-                      }}
-                    >
-                      {payLoading === order.id
-                        ? "⏳ Memproses..."
-                        : "Bayar Sekarang"}
-                    </button>
-                  </div>
-                )}
-                {order.status === "cancelled" && (
-                  <span className="text-xs text-gray-400">
-                    Order dibatalkan
-                  </span>
-                )}
-                {order.status === "delivered" && (
-                  <span
-                    className="text-xs font-semibold"
-                    style={{ color: "#15803D" }}
-                  >
-                    ✅ Selesai
-                  </span>
-                )}
+
+                <div>
+                  {order.status === "pending" && (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => confirmCancel(order.id)}
+                        disabled={cancelLoading === order.id}
+                        className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-500 bg-gray-100"
+                      >
+                        {cancelLoading === order.id
+                          ? "⏳ Membatalkan..."
+                          : "Batalkan"}
+                      </button>
+                      <button
+                        onClick={() => handlePayment(order)}
+                        disabled={payLoading === order.id}
+                        className="px-4 py-2 rounded-xl text-xs font-semibold text-white"
+                        style={{
+                          background:
+                            payLoading === order.id ? "#ccc" : "#E8192C",
+                        }}
+                      >
+                        {payLoading === order.id
+                          ? "⏳ Memproses..."
+                          : "Bayar Sekarang"}
+                      </button>
+                    </div>
+                  )}
+
+                  {order.status === "confirmed" && (
+                    <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-blue-100 text-blue-600">
+                      💳 Pembayaran Diterima
+                    </span>
+                  )}
+
+                  {order.status === "preparing" && (
+                    <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-orange-100 text-orange-600">
+                      🍳 Sedang Disiapkan
+                    </span>
+                  )}
+
+                  {order.status === "out_for_delivery" && (
+                    <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-purple-100 text-purple-600">
+                      🚗 Sedang Diantar
+                    </span>
+                  )}
+
+                  {order.status === "delivered" && (
+                    <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-green-100 text-green-600">
+                      ✅ Selesai
+                    </span>
+                  )}
+
+                  {order.status === "cancelled" && (
+                    <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-red-100 text-red-500">
+                      ❌ Dibatalkan
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           ))
@@ -269,7 +303,10 @@ export default function Orders() {
         >
           <span className="text-xl">📋</span> Orders
         </button>
-        <button className="flex-1 flex flex-col items-center py-3 gap-1 text-xs text-gray-400">
+        <button
+          onClick={() => navigate("/profile")}
+          className="flex-1 flex flex-col items-center py-3 gap-1 text-xs text-gray-400"
+        >
           <span className="text-xl">👤</span> Profile
         </button>
       </div>

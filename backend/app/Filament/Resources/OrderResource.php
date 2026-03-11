@@ -77,13 +77,24 @@ class OrderResource extends Resource
                     ->sortable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
+                    ->badge()
                     ->colors([
                         'gray' => 'pending',
-                        'warning' => 'confirmed',
-                        'primary' => 'processing',
+                        'info' => 'confirmed',
+                        'warning' => 'preparing',
+                        'primary' => 'out_for_delivery',
                         'success' => 'delivered',
                         'danger' => 'cancelled',
-                    ]),
+                    ])
+                    ->formatStateUsing(fn ($state) => match ($state) {
+                        'pending' => 'Menunggu Pembayaran',
+                        'confirmed' => 'Dibayar',
+                        'preparing' => 'Sedang Disiapkan',
+                        'out_for_delivery' => 'Sedang Diantar',
+                        'delivered' => 'Selesai',
+                        'cancelled' => 'Dibatalkan',
+                        default => $state,
+                    }),
                 // Tables\Columns\TextColumn::make('subtotal')
                 //     ->numeric()
                 //     ->sortable(),
@@ -101,19 +112,45 @@ class OrderResource extends Resource
                 //     ->dateTime()
                 //     ->sortable()
                 //     ->toggleable(isToggledHiddenByDefault: true),
+
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
-                        'pending' => 'Pending',
-                        'confirmed' => 'Confirmed',
-                        'processing' => 'Processing',
-                        'delivered' => 'Delivered',
-                        'cancelled' => 'Cancelled',
+                        'pending' => 'Menunggu Pembayaran',
+                        'confirmed' => 'Dibayar',
+                        'preparing' => 'Sedang Disiapkan',
+                        'out_for_delivery' => 'Sedang Diantar',
+                        'delivered' => 'Selesai',
+                        'cancelled' => 'Dibatalkan',
                     ]),
             ])
             ->actions([
+                Tables\Actions\Action::make('prepare')
+                    ->label('Siapkan')
+                    ->icon('heroicon-o-fire')
+                    ->color('warning')
+                    ->visible(fn ($record) => $record->status === 'confirmed')
+                    ->requiresConfirmation()
+                    ->action(fn ($record) => $record->update(['status' => 'preparing'])),
+
+                Tables\Actions\Action::make('deliver')
+                    ->label('Antar')
+                    ->icon('heroicon-o-truck')
+                    ->color('primary')
+                    ->visible(fn ($record) => $record->status === 'preparing')
+                    ->requiresConfirmation()
+                    ->action(fn ($record) => $record->update(['status' => 'out_for_delivery'])),
+
+                Tables\Actions\Action::make('complete')
+                    ->label('Selesai')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->visible(fn ($record) => $record->status === 'out_for_delivery')
+                    ->requiresConfirmation()
+                    ->action(fn ($record) => $record->update(['status' => 'delivered'])),
+
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([

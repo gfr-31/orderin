@@ -14,6 +14,7 @@ import Register from "./pages/Auth/Register";
 import Cart from "./pages/Cart/Cart";
 import Home from "./pages/Home/Home";
 import Orders from "./pages/Orders/Orders";
+import Profile from "./pages/Profile/Profile";
 
 // Protected Route - tampilkan alert kalau belum login
 const ProtectedRoute = ({ children }) => {
@@ -120,6 +121,16 @@ function App() {
           element={
             <ProtectedRoute>
               <Orders />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Profile */}
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
             </ProtectedRoute>
           }
         />

@@ -7,7 +7,8 @@ import useCartStore from "../../store/cartStore";
 export default function Home() {
   const navigate = useNavigate();
   const { user, logout, isAuthenticated } = useAuthStore();
-  const { items, addItem, getTotalItems } = useCartStore();
+  const { items, addItem, getTotalItems, updateQuantity, removeItem } =
+    useCartStore();
 
   const [categories, setCategories] = useState([]);
   const [menuItems, setMenuItems] = useState([]);
@@ -18,6 +19,7 @@ export default function Home() {
   const [lastPage, setLastPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
   const [searchTimeout, setSearchTimeout] = useState(null);
+  const CACHE_DURATION = 5 * 6 * 10000;
 
   useEffect(() => {
     fetchData();
@@ -32,6 +34,18 @@ export default function Home() {
   };
 
   const fetchData = async () => {
+    // Cek cache dulu
+    const cachedCategories = getCache("categories");
+    const cachedMenu = getCache("menu_all_page1");
+
+    if (cachedCategories && cachedMenu) {
+      setCategories(cachedCategories);
+      setMenuItems(cachedMenu.data);
+      setLastPage(cachedMenu.meta.last_page);
+      setLoading(false);
+      return; // stop, tidak perlu fetch API
+    }
+
     try {
       const [catRes, menuRes] = await Promise.all([
         api.get("/categories"),
@@ -41,6 +55,10 @@ export default function Home() {
       setMenuItems(menuRes.data.data);
       setLastPage(menuRes.data.meta.last_page);
       setCurrentPage(1);
+
+      // Simpan ke cache
+      setCache("categories", catRes.data.data);
+      setCache("menu_all_page1", menuRes.data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -131,6 +149,39 @@ export default function Home() {
     }, 700);
 
     setSearchTimeout(timeout);
+  };
+
+  const getCache = (key) => {
+    try {
+      const cached = localStorage.getItem(key);
+      if (!cached) return null;
+      const { data, timestamp } = JSON.parse(cached);
+      if (Date.now() - timestamp > CACHE_DURATION) {
+        localStorage.removeItem(key);
+        return null;
+      }
+      return data;
+    } catch {
+      return null;
+    }
+  };
+
+  const setCache = (key, data) => {
+    try {
+      localStorage.setItem(
+        key,
+        JSON.stringify({
+          data,
+          timestamp: Date.now(),
+        }),
+      );
+    } catch {}
+  };
+
+  // Fungsi cek jumlah item di cart
+  const getItemQty = (menuItemId) => {
+    const item = items.find((i) => i.id === menuItemId);
+    return item ? item.quantity : 0;
   };
 
   return (
@@ -291,23 +342,10 @@ export default function Home() {
           ))}
         </div>
 
-        {/* MENU GRID */}
-        <h3
-          className="text-xl font-bold mb-4"
-          style={{ fontFamily: "Playfair Display, serif" }}
-        >
-          Menu Tersedia
-        </h3>
-
-        {loading ? (
-          <div className="text-center py-20 text-gray-400">Loading...</div>
-        ) : filteredMenu.length === 0 ? (
-          <div className="text-center py-20 text-gray-400">
-            Menu tidak ditemukan 😢
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {filteredMenu.map((item) => (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {filteredMenu.map((item) => {
+            const qty = getItemQty(item.id);
+            return (
               <div
                 key={item.id}
                 className="bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-lg transition-all hover:-translate-y-1"
@@ -336,29 +374,55 @@ export default function Home() {
                   <div className="text-xs text-gray-400 mb-1">
                     {item.category?.name}
                   </div>
-                  <div className="font-semibold text-sm mb-2 line-clamp-1">
+                  <div className="font-semibold text-sm mb-1 line-clamp-1">
                     {item.name}
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span
-                      className="font-bold text-sm"
-                      style={{ color: "#E8192C" }}
-                    >
-                      {formatPrice(item.price)}
-                    </span>
+                  <div
+                    className="font-bold text-sm mb-3"
+                    style={{ color: "#E8192C" }}
+                  >
+                    {formatPrice(item.price)}
+                  </div>
+
+                  {/* TOMBOL */}
+                  {qty > 0 ? (
+                    <div className="flex items-center justify-between gap-2">
+                      <button
+                        onClick={() =>
+                          qty === 1
+                            ? removeItem(item.id)
+                            : updateQuantity(item.id, qty - 1)
+                        }
+                        className="flex-1 py-1.5 rounded-xl text-white font-bold text-lg"
+                        style={{ background: "#E8192C" }}
+                      >
+                        −
+                      </button>
+                      <span className="font-bold text-gray-800 text-sm  text-center">
+                        {qty}
+                      </span>
+                      <button
+                        onClick={() => handleAddItem(item)}
+                        className="flex-1 py-1.5 rounded-xl text-white font-bold text-lg"
+                        style={{ background: "#E8192C" }}
+                      >
+                        +
+                      </button>
+                    </div>
+                  ) : (
                     <button
                       onClick={() => handleAddItem(item)}
-                      className="w-8 h-8 rounded-lg text-white text-lg font-light flex items-center justify-center"
+                      className="w-full py-1.5 rounded-xl text-white text-sm font-semibold"
                       style={{ background: "#E8192C" }}
                     >
-                      +
+                      + Tambah
                     </button>
-                  </div>
+                  )}
                 </div>
               </div>
-            ))}
-          </div>
-        )}
+            );
+          })}
+        </div>
 
         {/* LOAD MORE */}
         {currentPage < lastPage && (
@@ -406,7 +470,10 @@ export default function Home() {
         </button>
 
         {user ? (
-          <button className="flex-1 flex flex-col items-center py-3 gap-1 text-xs text-gray-400">
+          <button
+            onClick={() => navigate("/profile")}
+            className="flex-1 flex flex-col items-center py-3 gap-1 text-xs text-gray-400"
+          >
             <span className="text-xl">👤</span> Profile
           </button>
         ) : (

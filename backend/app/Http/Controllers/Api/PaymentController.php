@@ -78,35 +78,46 @@ class PaymentController extends Controller
 
     public function getSnapToken(Request $request, Order $order)
     {
-        // Pastikan order milik customer yang login
         if ($order->user_id !== $request->user()->id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        // Pastikan order masih pending
         if ($order->status !== 'pending') {
             return response()->json(['message' => 'Order tidak bisa dibayar'], 422);
         }
 
-        // Setup Midtrans
         \Midtrans\Config::$serverKey = config('services.midtrans.server_key');
         \Midtrans\Config::$isProduction = config('services.midtrans.is_production');
         \Midtrans\Config::$isSanitized = true;
         \Midtrans\Config::$is3ds = true;
 
-        // Parameter untuk Midtrans
+        // Kalau sudah ada snap token → cancel dulu transaksi lama
+        if ($order->payment->snap_token) {
+            try {
+                \Midtrans\Transaction::cancel($order->payment->reference_id);
+            } catch (\Exception $e) {
+                // Abaikan kalau gagal cancel
+            }
+
+            $order->payment->update([
+                'snap_token' => null,
+                'reference_id' => null,
+            ]);
+        }
+
+        $referenceId = $order->order_number.'-'.time();
+
         $params = [
             'transaction_details' => [
-                'order_id' => $order->payment->reference_id ?? $order->order_number.'-'.time(),
-                'gross_amount' => (int) $order->total, // ← total sudah include tax
+                'order_id' => $referenceId,
+                'gross_amount' => (int) $order->total,
             ],
             'customer_details' => [
                 'first_name' => $request->user()->name,
                 'email' => $request->user()->email,
-                'phone' => $request->user()->phone,
+                'phone' => $request->user()->phone ?? '',
             ],
             'item_details' => array_merge(
-                // Item menu
                 $order->orderItems->map(function ($item) {
                     return [
                         'id' => $item->menu_item_id,
@@ -115,29 +126,30 @@ class PaymentController extends Controller
                         'name' => $item->menuItem->name,
                     ];
                 })->toArray(),
-                // Tax sebagai item terpisah
-                [
-                    [
-                        'id' => 'TAX',
-                        'price' => (int) $order->tax,
-                        'quantity' => 1,
-                        'name' => 'PPN 11%',
-                    ],
-                ]
+                [[
+                    'id' => 'TAX',
+                    'price' => (int) $order->tax,
+                    'quantity' => 1,
+                    'name' => 'PPN 11%',
+                ]]
             ),
+            'enabled_payments' => [
+                // 'gopay',
+                // 'shopeepay',
+                // 'dana',
+                // 'ovo',
+                'other_qris',
+                // 'credit_card',
+            ],
         ];
 
-        // Generate snap token
         $snapToken = \Midtrans\Snap::getSnapToken($params);
 
-        // Simpan snap token & reference id ke payment
         $order->payment->update([
             'snap_token' => $snapToken,
-            'reference_id' => $params['transaction_details']['order_id'],
+            'reference_id' => $referenceId,
         ]);
 
-        return response()->json([
-            'snap_token' => $snapToken,
-        ]);
+        return response()->json(['snap_token' => $snapToken]);
     }
 }

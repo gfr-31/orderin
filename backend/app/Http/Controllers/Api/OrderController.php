@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\NewOrderReceived;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderResource;
 use App\Models\MenuItem;
@@ -105,6 +106,9 @@ class OrderController extends Controller
             DB::commit();
 
             $order->load(['orderItems.menuItem', 'payment']);
+
+            // Broadcast notifikasi ke admin
+            broadcast(new NewOrderReceived($order));
 
             return response()->json([
                 'message' => 'Order Created Successfully',
