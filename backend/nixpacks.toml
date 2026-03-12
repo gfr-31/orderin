@@ -25,7 +25,8 @@ cmds = [
 [phases.build]
 cmds = [
     "npm run build",
-    "composer install --no-dev --optimize-autoloader --no-scripts"
+    "composer install --no-dev --optimize-autoloader --no-scripts",
+    "php artisan vendor:publish --tag=filament-assets --force"
 ]
 
 [start]
