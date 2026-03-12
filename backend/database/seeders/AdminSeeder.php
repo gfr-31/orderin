@@ -13,7 +13,7 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        Admin::create([
+        Admin::updateOrCreate([
             'name' => 'Super Admin',
             'email' => 'admin@orderin.com',
             'password' => 'admin',
