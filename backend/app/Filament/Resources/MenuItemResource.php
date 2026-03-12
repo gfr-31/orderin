@@ -41,7 +41,7 @@ class MenuItemResource extends Resource
                     ->minValue(0),
                 Forms\Components\FileUpload::make('image')
                     ->image()
-                    ->disk('public')
+                    ->disk('s3')
                     ->directory('menu-items')
                     ->visibility('public')
                     ->imageResizeTargetHeight('500')
