@@ -10,14 +10,13 @@ nixPkgs = [
     "php83Extensions.gd", 
     "php83Extensions.bcmath", 
     "php83Extensions.tokenizer", 
-    "php83Extensions.pcntl", # WAJIB untuk Reverb
-    "php83Extensions.posix", # WAJIB untuk Reverb
+    "php83Extensions.pcntl",
+    "php83Extensions.posix",
     "php83Packages.composer", 
     "nodejs_20"
 ]
 
 [phases.install]
-# Tambahkan --no-scripts agar tidak error saat instalasi awal
 cmds = [
     "composer install --ignore-platform-reqs --no-scripts",
     "npm ci"
@@ -26,9 +25,8 @@ cmds = [
 [phases.build]
 cmds = [
     "npm run build",
-    # Tambahkan --no-scripts di sini juga agar build tidak crash
     "composer install --no-dev --optimize-autoloader --no-scripts"
 ]
 
 [start]
-cmd = "php artisan migrate --force && php artisan storage:link --force && php artisan config:cache && php artisan route:cache && (php artisan reverb:start --host=0.0.0.0 --port=8080 & php artisan serve --host=0.0.0.0 --port=$PORT)"
+cmd = "php artisan migrate --force && php artisan storage:link --force && php artisan config:cache && php artisan route:cache && php artisan reverb:start --host=0.0.0.0 --port=6001 & php artisan serve --host=0.0.0.0 --port=${PORT:-8080}"
