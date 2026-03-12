@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Admin;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class AdminSeeder extends Seeder
@@ -13,13 +12,15 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        Admin::updateOrCreate([
-            'name' => 'Super Admin',
-            'email' => 'admin@orderin.com',
-            'password' => 'admin',
-            'role' => 'superadmin',
-            'phone' => '083813050855',
-            'is_active' => 1,
-        ]);
+        Admin::updateOrCreate(
+            ['email' => 'admin@orderin.com'],
+            [
+                'name' => 'Super Admin',
+                'password' => 'admin123',
+                'role' => 'superadmin',
+                'phone' => '083813050855',
+                'is_active' => 1,
+            ]
+        );
     }
 }
