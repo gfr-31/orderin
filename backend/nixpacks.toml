@@ -1,5 +1,18 @@
 [phases.setup]
-nixPkgs = ["php83", "php83Extensions.pdo", "php83Extensions.pdo_mysql", "php83Extensions.mbstring", "php83Extensions.xml", "php83Extensions.curl", "php83Extensions.zip", "php83Extensions.gd", "php83Extensions.bcmath", "php83Extensions.tokenizer", "php83Packages.composer", "nodejs_20"]
+nixPkgs = [
+    "php83", 
+    "php83Extensions.pdo", 
+    "php83Extensions.pdo_mysql", 
+    "php83Extensions.mbstring", 
+    "php83Extensions.xml", 
+    "php83Extensions.curl", 
+    "php83Extensions.zip", 
+    "php83Extensions.gd", 
+    "php83Extensions.bcmath", 
+    "php83Extensions.tokenizer", 
+    "php83Packages.composer", 
+    "nodejs_20"
+]
 
 [phases.install]
 cmds = [
@@ -11,11 +24,17 @@ cmds = [
 cmds = [
     "composer install --no-dev --optimize-autoloader",
     "npm run build",
+    "php artisan storage:link", # WAJIB agar Filament tidak burik
     "php artisan config:cache",
     "php artisan route:cache",
     "php artisan view:cache"
 ]
 
+# Tambahkan fase deploy agar migrasi jalan otomatis setiap update
+[phases.deploy]
+cmds = [
+    "php artisan migrate --force"
+]
 
 [start]
 cmd = "php artisan serve --host=0.0.0.0 --port=$PORT"
