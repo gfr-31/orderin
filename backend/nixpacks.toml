@@ -26,9 +26,9 @@ cmds = [
 [phases.build]
 cmds = [
     "npm run build",
-    "composer install --no-dev --optimize-autoloader"
+    # Tambahkan --no-scripts di sini juga agar build tidak crash
+    "composer install --no-dev --optimize-autoloader --no-scripts"
 ]
 
 [start]
-# Pindahkan semua perintah Artisan ke tahap Start karena di sini DB sudah konek
-cmd = "php artisan migrate --force && php artisan storage:link --force && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan serve --host=0.0.0.0 --port=$PORT"
+cmd = "php artisan migrate --force && php artisan storage:link --force && php artisan config:cache && php artisan route:cache && (php artisan reverb:start --host=0.0.0.0 --port=8080 & php artisan serve --host=0.0.0.0 --port=$PORT)"
