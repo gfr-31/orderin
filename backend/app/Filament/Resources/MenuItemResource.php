@@ -43,6 +43,7 @@ class MenuItemResource extends Resource
                     ->image()
                     ->disk('s3')
                     ->directory('menu-items')
+                    ->visibility('public')
                     ->imageResizeTargetHeight('500')
                     ->imageResizeTargetWidth('500')
                     ->imageResizeMode('cover')
