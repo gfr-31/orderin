@@ -30,11 +30,6 @@ cmds = [
     "php artisan view:cache"
 ]
 
-# Tambahkan fase deploy agar migrasi jalan otomatis setiap update
-[phases.deploy]
-cmds = [
-    "php artisan migrate --force"
-]
-
+# Hapus [phases.deploy] yang lama, ganti bagian [start] jadi begini:
 [start]
-cmd = "php artisan serve --host=0.0.0.0 --port=$PORT"
+cmd = "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT"
