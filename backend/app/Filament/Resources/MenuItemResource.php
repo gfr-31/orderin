@@ -73,7 +73,8 @@ class MenuItemResource extends Resource
                 Tables\Columns\TextColumn::make('price')
                     ->money('IDR')
                     ->sortable(),
-                Tables\Columns\ImageColumn::make('image'),
+                Tables\Columns\ImageColumn::make('image')
+                    ->disk('s3')->circular(),
                 Tables\Columns\IconColumn::make('is_available')
                     ->boolean()
                     ->trueIcon('heroicon-s-check-circle')
