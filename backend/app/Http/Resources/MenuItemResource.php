@@ -21,7 +21,7 @@ class MenuItemResource extends JsonResource
             'slug' => $this->slug,
             'description' => $this->description,
             'price' => $this->price,
-            'image' => $this->image ? asset('storage/'.$this->image) : null,
+            'image' => $this->image ? $this->image : null,
             'is_available' => $this->is_available,
             'is_featured' => $this->is_featured,
         ];

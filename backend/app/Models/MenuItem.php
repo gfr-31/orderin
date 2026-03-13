@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class MenuItem extends Model
@@ -55,12 +54,10 @@ class MenuItem extends Model
             return null;
         }
 
-        // Kalau sudah URL lengkap R2, return langsung
         if (str_starts_with($value, 'http')) {
             return $value;
         }
 
-        // Generate URL dari S3
-        return Storage::disk('s3')->url($value);
+        return config('filesystems.disks.s3.url').'/'.$value;
     }
 }
