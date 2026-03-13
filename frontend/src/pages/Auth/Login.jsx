@@ -31,7 +31,7 @@ export default function login() {
       className="min-h-screen flex"
       style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
     >
-      {/* LEFT - BRANDING */}
+      {/* LEFT - BRANDINGs */}
       <div
         className="hidden lg:flex w-1/2 flex-col justify-center items-center p-12"
         style={{ background: "linear-gradient(135deg, #E8192C, #8B0000)" }}
