@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import api from "../../services/api.js";
+import api from "../../api/axios";
 import useAuthStore from "../../store/authStore.js";
 
 export default function Register() {
