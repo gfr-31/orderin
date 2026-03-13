@@ -14,7 +14,7 @@ export default function Orders() {
   useEffect(() => {
     fetchOrders();
 
-    // Auto refresh tiap 10 detik
+    // Auto refresh tiap 10 detiks
     const interval = setInterval(() => {
       fetchOrders();
     }, 10000);
