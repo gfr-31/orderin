@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Events\NewOrderReceived;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderResource;
 use App\Models\MenuItem;
@@ -95,7 +94,7 @@ class OrderController extends Controller
                 ]);
             }
 
-            // Buat Payment Dengan Status Panding
+            // Buat Payment Dengan Status Pending
             Payment::create([
                 'order_id' => $order->id,
                 'method' => 'midtrans',
@@ -107,18 +106,16 @@ class OrderController extends Controller
 
             $order->load(['orderItems.menuItem', 'payment']);
 
-            // Broadcast notifikasi ke admin
-            broadcast(new NewOrderReceived($order));
-
             return response()->json([
                 'message' => 'Order Created Successfully',
                 'data' => new OrderResource($order),
             ], 201);
+
         } catch (\Exception $e) {
             DB::rollBack();
 
             return response()->json([
-                'message' => 'Fialed to Create Order',
+                'message' => 'Failed to Create Order',
                 'error' => $e->getMessage(),
             ], 500);
         }
