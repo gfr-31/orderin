@@ -1,6 +1,6 @@
 import useCartStore from "../../store/cartStore";
 import useAuthStore from "../../store/authStore";
-import api from "../../api/axios";
+import api from "../../services/api";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
