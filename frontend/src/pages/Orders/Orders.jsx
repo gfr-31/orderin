@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../../api/axios";
+import api from "../../services/api";
 
 export default function Orders() {
   const navigate = useNavigate();
