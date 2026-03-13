@@ -37,7 +37,7 @@ export default function Profile() {
         </div>
       )}
 
-      {/* Header */}
+      {/* Headers */}
       <div style={{ background: "#E8192C" }} className="px-4 pt-12 pb-16">
         <h1
           className="text-white text-xl font-bold"

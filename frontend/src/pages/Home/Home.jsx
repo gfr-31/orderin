@@ -43,7 +43,7 @@ export default function Home() {
       setMenuItems(cachedMenu.data);
       setLastPage(cachedMenu.meta.last_page);
       setLoading(false);
-      return; // stop, tidak perlu fetch API
+      return; // stop, tidak perlu fetch APIs
     }
 
     try {

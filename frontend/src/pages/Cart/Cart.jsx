@@ -36,7 +36,7 @@ export default function Cart() {
       return;
     }
 
-    // Validasi cart tidak boleh kosong
+    // Validasi cart tidak boleh kosongg
     if (items.length === 0) {
       setError("Kerangjang kamu kosong!");
       return;
@@ -55,8 +55,8 @@ export default function Cart() {
         })),
       });
 
-      clearCart();
       navigate("/orders");
+      clearCart();
     } catch (error) {
       setError(error.response?.data?.message || "Gagal membuat order!");
     } finally {
