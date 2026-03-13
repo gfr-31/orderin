@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class MenuItem extends Model
@@ -20,7 +21,7 @@ class MenuItem extends Model
 
     protected function casts(): array
     {
-        return[
+        return [
             'price' => 'decimal:2',
             'is_available' => 'boolean',
             'is_featured' => 'boolean',
@@ -31,20 +32,35 @@ class MenuItem extends Model
     {
         parent::boot();
 
-        static::creating(function ($menuItem){
+        static::creating(function ($menuItem) {
             $menuItem->slug = Str::slug($menuItem->name);
         });
     }
 
     // Relasi Ke Category
-    public function category() {
+    public function category()
+    {
         return $this->belongsTo(Category::class);
     }
 
     // Relasi Ke Order Items
-    public function orderItems() {
+    public function orderItems()
+    {
         return $this->hasMany(OrderItem::class);
     }
 
+    public function getImageAttribute($value)
+    {
+        if (! $value) {
+            return null;
+        }
 
+        // Kalau sudah URL lengkap R2, return langsung
+        if (str_starts_with($value, 'http')) {
+            return $value;
+        }
+
+        // Generate URL dari S3
+        return Storage::disk('s3')->url($value);
+    }
 }
