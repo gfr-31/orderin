@@ -108,21 +108,17 @@ class OrderController extends Controller
             $order->load(['orderItems.menuItem', 'payment']);
 
             // Broadcast notifikasi ke admin
-            broadcast(new NewOrderReceived($order));
+try {
+    broadcast(new NewOrderReceived($order));
+} catch (\Exception $e) {
+    // Broadcast gagal tapi order tetap sukses
+    \Log::warning('Broadcast failed: ' . $e->getMessage());
+}
 
-            return response()->json([
-                'message' => 'Order Created Successfully',
-                'data' => new OrderResource($order),
-            ], 201);
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return response()->json([
-                'message' => 'Fialed to Create Order',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    }
+return response()->json([
+    'message' => 'Order Created Successfully',
+    'data' => new OrderResource($order),
+], 201);
 
     // Cancel Order
     public function cancel(Request $request, Order $order)
