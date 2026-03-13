@@ -18,8 +18,7 @@
                 <div class="flex items-start justify-between">
                     <div class="flex items-start gap-3">
                         @if ($item->menuItem->image)
-                            <img src="{{ Storage::url($item->menuItem->image) }}"
-                                class="w-10 h-10 rounded-lg object-cover" />
+                            <img src="{{ $item->menuItem->image }}" class="w-10 h-10 rounded-lg object-cover" />
                         @else
                             <div class="w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center text-lg">🍽️
                             </div>
