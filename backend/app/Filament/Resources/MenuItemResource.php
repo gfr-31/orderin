@@ -41,18 +41,13 @@ class MenuItemResource extends Resource
                     ->minValue(0),
                 Forms\Components\FileUpload::make('image')
                     ->image()
-    ->disk('s3')
-    ->directory('menu-items')
-    ->imageResizeTargetHeight('500')
-    ->imageResizeTargetWidth('500')
-    ->imageResizeMode('cover')
-    ->nullable()
-    ->dehydrated(fn ($state) => filled($state)),
+                    ->disk('s3')
                     ->directory('menu-items')
                     ->imageResizeTargetHeight('500')
                     ->imageResizeTargetWidth('500')
                     ->imageResizeMode('cover')
-                    ->nullable(),
+                    ->nullable()
+                    ->dehydrated(fn ($state) => filled($state)),
                 Forms\Components\Toggle::make('is_available')
                     ->default(true)
                     ->required(),
